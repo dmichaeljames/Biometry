@@ -1,0 +1,122 @@
+---
+title: "Homework_006"
+author: "Mike James"
+date: "4/09/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ISwR)
+library(RColorBrewer)
+library(ggplot2)
+data <- read.csv("h6p1(1).csv", sep=",")
+head(data)
+summary(data)
+setwd("~/Dropbox/SLU/BIOMETRY/LAB/Homework/006")
+```
+***
+***
+
+*A marine biologist is interested on how the protein level **(DIET)** in the diets of sea urchins affects growth (as measured by inter-radial suture**(SUTW)**). He maintained urchins in diets that were either low or high in protein content, as well as those individuals that occurred in the wild (reference).* 
+
+***Are there differences in growth rate among the groups?***
+
+***
+***
+***
+
+```{r}
+dataHigh <- data[data$DIET == "High", ]
+dataLow <- data[data$DIET == "Low", ]
+```
+
+```{r}
+ggplot(dataLow, mapping = aes(IV, SUTW)) +
+  ggtitle("Plate IV Size VS. Intra-radial Suture Size for a Low Protein Diet") +
+  geom_point() +
+  xlab("Plate IV Size") +
+  ylab("Intra-radial Suture Size") +
+  scale_color_hue(name = "Diet") +
+  geom_smooth(method='lm', formula = y~x)
+```
+
+```{r}
+ggplot(dataHigh, mapping = aes(IV, SUTW)) +
+  ggtitle("Plate IV Size VS. Intra-radial Suture Size for a High Protein Diet") +
+  geom_point() +
+  xlab("Plate IV Size") +
+  ylab("Intra-radial Suture Size") +
+  scale_color_hue(name = "Diet") +
+  geom_smooth(method='lm', formula = y~x)
+```
+
+Both regressions appear to have similar slopes, but I'm not so sure the graphs are linear.
+
+
+***
+***
+***
+
+```{r}
+ggplot(dataLow, mapping = aes(IV, SUTW)) +
+  ggtitle("Plate IV Size VS. Intra-radial Suture Size for a Low Protein Diet") +
+  geom_point() +
+  xlab("Plate IV Size") +
+  ylab("Intra-radial Suture Size") +
+  scale_color_hue(name = "Diet") +
+  geom_smooth(method='lm', formula = y~poly(x,2,raw=TRUE))
+```
+```{r}
+ggplot(dataHigh, mapping = aes(IV, SUTW)) +
+  ggtitle("Plate IV Size VS. Intra-radial Suture Size for a High Protein Diet") +
+  geom_point() +
+  xlab("Plate IV Size") +
+  ylab("Intra-radial Suture Size") +
+  scale_color_hue(name = "Diet") +
+  geom_smooth(method='lm', formula = y~poly(x,2,raw=TRUE))
+```
+
+```{r}
+poly_data.lm <- lm(data$IV ~ poly(data$SUTW, 2))
+residuals <- residuals(poly_data.lm)
+```
+
+### Predictions
+
+Now is the part of the experiment where we're done with our math, we **think** we have some idea how this works, and we should be able to predict what will happen based on this data. 
+
+```{r warning = FALSE}
+predict(poly_data.lm, int ="c") # Confidence intervals
+predict(poly_data.lm, int="p") # Prediction intervals
+```
+<!--
+
+[//]: # ```{r warning=FALSE}
+x <- data.frame(6)
+please <- data.frame(poly_data.lm$IV)
+predict.glm(please, newdata=x, int="p")
+[//]: # ```
+
+
+***
+***
+
+#```{r}
+#options(na.action=na.exclude)
+#pred.frame <- data.frame(poly_data.lm$SUTW)
+#pp <- predict(data=data, int="p", newdata=pred.frame)
+#pc <- predict(data=data, int="c", newdata=pred.frame)
+#pred.SUTW <- pred.frame$SUTW
+#plot(SUTW, IV, ylim=range(IV, pp, na.rm = TRUE))
+#matlines(pred.SUTW, pc, lty = c(3,1,1), col=c("purple","green","blue"))
+#matlines(pred.SUTW, pp, lty = 1, col="red")
+```
+
+-->
+
+# Results
+
+No, they do not have different growth rates based on diet.
+
+P.S. I ran out of time, hence the shit quality.

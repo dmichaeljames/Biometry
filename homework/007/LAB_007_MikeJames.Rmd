@@ -1,0 +1,159 @@
+---
+title: "HOMEWORK_007"
+author: "Michael James"
+date: "April 28, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(car)
+library(ISwR)
+```
+
+***
+
+## PROBLEM 1  
+
+> Using	the	data	from	the	simple	regression homework, test	the	hypothesis	that	the	
+slopes	and	intercepts	are	the	same.  
+
+### RESULTS  
+
+
+```{r}
+h6p1 <- read.csv("h6p1(1).csv", sep=",")
+head(h6p1)
+summary(h6p1)
+```
+
+```{r}
+attach(h6p1)
+boxplot(IV~SUTW)
+
+par(mfrow=c(1,2))
+plot(aov(IV~SUTW+DIET, which=1))
+```
+
+```{r}
+scatterplot(SUTW~IV|DIET, xlab = "Plate IV Width", ylab = "Suture Width")
+anova(aov(IV~SUTW*DIET))
+```
+
+```{r}
+scatterplot(log10(SUTW)~log10(IV)|DIET, xlab = "Plate IV Width", ylab = "Suture Width")
+data.aov <- aov(log10(IV)~log10(SUTW)+DIET)
+anova(data.aov)
+```
+
+```{r}
+plot(log10(IV), log10(SUTW), pch=as.numeric(DIET), main = "Log10(Plate IV Width) vs Log10(Suture Width)", xlab = "Log10(Plate IV width)", ylab = "Log10(Suture Width)")
+points(log10(IV), log10(SUTW), col = c("Green", "Red", "Yellow"))
+legend("topleft", legend = c("High", "Low", "Ref"), pch = as.numeric(DIET), col = c("Green", "Red", "Yellow"))
+high.diet <- h6p1[h6p1$DIET=="High", ]
+low.diet <-h6p1[h6p1$DIET=="Low", ] 
+lm.high <- lm(log10(SUTW)~log10(IV), data=high.diet)
+lm.low <- lm(log10(SUTW)~log10(IV), data=low.diet)
+abline(lm.high, col = "Green")
+abline(lm.low, col = "Red")
+```
+
+
+```{r}
+summary(lm(log10(SUTW)~log10(IV)+DIET))
+
+plot(IV, SUTW, pch=as.numeric(DIET), log="xy")
+points(IV, SUTW, col = c("Green", "Red", "Yellow"))
+legend("topleft", legend = c("High", "Low", "Ref"), pch = as.numeric(DIET), col = c("Green", "Red", "Yellow"))
+abline(a=-1.64987, b=0.48408, col = "Green")
+abline(a=-1.64987-0.20386, b=0.48408, col = "Red")
+detach(h6p1)
+```
+
+
+
+### CONCLUSION
+
+Initial analysis of the data showed the variances were not equal based on diet (F = 8.274, p = 0.0006); however, there was not a linear fit. After linearizing the data by taking the $log_{10}$ we get improved statistics (F = 8.9884, p = 0.0003) thus allowing us to reject the null hypothesis that the variances are equal.
+
+There is a significant effect of plate IV width on suture width after controlling for diet (F(3,68) = 24.91, p <<< 0.05).
+
+***
+
+## PROBLEM II
+> Data from a study on bird fitness and development was collected from urban population
+in Manaus, Brazil. Birds were categorized by sex and age (days), weight (mg) and
+wingspan (mm) were recorded.  
+
+> Do males and females exhibit similar wingspans relative
+to weight?
+
+### JUSTIFICATION
+Here we have a two-way model with one random effect. We will be looking to see if the variances differ between male and female birds and if the covariance has any effect on the wingspan of said birds.
+
+### RESULTS
+
+```{r}
+h7p2 <- read.csv("h7p2.csv", sep=",")
+head(h7p2)
+summary(h7p2)
+```
+
+"Height" is actually supposed to be "Weight." Let's fix that.
+
+```{r}
+attach(h7p2)
+colnames(h7p2)[colnames(h7p2)=="Height"] <- "Weight"
+head(h7p2)
+summary(h7p2)
+```
+
+```{r}
+plot(h7p2$Weight, Wingspan) #, pch=as.numeric(Gender))
+points(h7p2$Weight, Wingspan, col = c("Blue", "Pink"))
+legend("topleft", legend = c("Male", "Female"), pch = as.numeric(Gender), col = c("Blue", "Pink"))
+```
+
+```{r}
+scatterplot(h7p2$Weight~Wingspan|Gender)
+anova(aov(Wingspan~h7p2$Weight*Gender))
+```
+
+```{r}
+scatterplot(log(h7p2$Weight)~log(Wingspan)|Gender)
+data2.aov <- aov(log10(h7p2$Weight)~log10(Wingspan)+Gender)
+anova(data2.aov)
+```
+
+```{r}
+plot(log10(h7p2$Weight), log10(Wingspan), pch=as.numeric(Gender), main = "Log10(Weight(mg)) vs Log10(Wingspan(mm))", xlab = "Log10(Weight(mg))", ylab = "Log10(Wingspan(mm))")
+points(log10(h7p2$Weight), log10(Wingspan), col = c("Blue", "Pink"))
+legend("topleft", legend = c("Male", "Female"), pch = as.numeric(Gender), col = c("Blue", "Pink"))
+
+males <- h7p2[Gender=="m", ]
+females <-h7p2[Gender=="f", ] 
+
+lm.males <- lm(log10(Wingspan)~log10(Weight), data=males)
+lm.females <- lm(log10(Wingspan)~log10(Weight), data=females)
+
+abline(lm.males, col = "Blue")
+abline(lm.females, col = "Pink")
+```
+
+
+```{r}
+summary(lm(log10(Wingspan)~log10(h7p2$Weight)+Gender))
+
+plot(h7p2$Weight, Wingspan, pch=as.numeric(Gender), log="xy")
+points(h7p2$Weight,Wingspan, col = c("Blue", "Pink"))
+legend("topleft", legend = c("Male", "Female"), pch = as.numeric(Gender), col = c("Blue", "Pink"))
+
+abline(a=-2.215265, b=2.359316)
+abline(a=-2.215265+0.005772, b=2.359316)
+```  
+
+### CONCLUSION
+
+Initial analysis of the data showed the variances were not equal based on diet (F = 353.204, p <<< 0.05); however, there was not a linear fit. After linearizing the data by taking the $log_{10}$ we get improved statistics (F = 411.1884, p <<< 0.05) thus allowing us to reject the null hypothesis that the variances are equal.
+
+There is a significant effect of Weight on Wingspan after controlling for gender (F(2,234) = 201.2, p <<< 0.05).

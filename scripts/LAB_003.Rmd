@@ -1,0 +1,106 @@
+---
+title: "LAB_003"
+author: "Michael James"
+date: "February 4, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+# R packages
+
+* This is from ISwR  
+
+```{r}
+sample(1:40,5)
+sample(1:10,5)
+sample(1:5,5)
+```
+
+*These were sampled **without** replacement*
+
+```{r}
+sample(1:5,5,replace=T)
+```
+
+*These were sample **WITH** replacement*  
+
+***
+
+# Combinatorics
+
+$(_k^n) = \frac{n!}{k!(n-k)!}$  
+
+```{r}
+# 3 black, 2 reds
+# As of this point, this is incorrect. Should be something with choose(52,x)
+black <- choose(52,3)
+red <- choose(52,2)
+(total <- black + red)
+```
+
+# Density
+
+Flipping a coin 10 times and getting 3 heads
+Flipping a coin 10 times and getting 7 heads
+
+```{r}
+dbinom(3, size=10, prob=0.5)
+dbinom(7, size=10, prob=0.5)  
+```
+
+> Post-hoc Probability: "Let's make a deal"  
+
+```{r}
+x <- 0:10
+plot(x,dbinom(x, size=10, prob=0.5), type="h")
+```
+
+
+> Normal p.d.f.  
+
+```{r}
+x <- seq(-4,4,0.1)
+plot(x, dnorm(x), type="l")
+curve(dnorm(x), from = -4, to = 4)
+```
+
+# Cumulative Distribution Function 
+
+**See lecture notes**
+
+# Quantiles
+
+```{r}
+# Proportion of individuals, mean we're looking at, standard deviation
+qnorm(0.95, 132, 13)
+```
+
+Example of a 95% Confidence Interval
+
+$\bar{X}\pm95$%
+
+
+```{r}
+xbar <- 83
+sigma <- 12
+n <- 5
+(sem <-sigma/sqrt(n))
+xbar + sem + qnorm(0.0250)
+xbar + sem + qnorm(0.975)
+```
+
+***
+
+# Random numbers
+
+```{r}
+(rnorm(10))
+(rnorm(10, mean=7, sd=5))
+(rbinom(10, size = 20, prob = 0.5))
+```
+

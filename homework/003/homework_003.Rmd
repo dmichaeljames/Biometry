@@ -1,0 +1,157 @@
+---
+title: "homework_003"
+author: "Mike James"
+date: "March 1, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+# Question I
+
+A fixed factor is one in which the levels are set *before* the experiment and we are looking to see what differences occur between the differing levels.  
+
+A random factor is one that represents the population as a whole; meaning, the factor can be just about anything as opposed to a set level.
+
+They both share the fact that they are linear models, but obviously, a fixed factor represents the population average while the random factor represents individual effects.
+
+An example of a fixed factor is drug testing. There is the control, the $\frac{1}{2}$ dose, and a full dose. Each level is set *before* the experiment and we are looking to see how each levels affects the outcomes.
+
+An example of a random factor is the bear weight based on location example from class. We do not have any specific quantities to compare, so we don't know how they are correlated.
+
+
+***
+
+# Question II
+
+a. Determine if adding different sugars to the growth media in Drosophila has an effect in the development of ocular units.  
+
+b. Provide the mean treatment effect that each factor level has, ie, individual $\alpha_{i}$'s. What can you conclude from that information? 
+
+## Justification
+
+$H_0$: Sugars have no effect of the number of ocular units  
+$H_a$: Sugars do have an effect on the number of ocular units
+
+Looking at a simple boxplot of the data, the control has a relatively high number of ocular units compared to **any** of the factors tested for. The 2% sucrose treatment appears to be the closest as far as the number of ocular units, while all other treatments appear to have about the same effect -- and much lower ocular units.
+
+## Results
+
+```{r}
+data2 <- read.delim("h3p2.txt")
+attach(data2)
+summary(data2)
+plot(ocular.units~sugar.treatment)
+anova(lm(ocular.units~sugar.treatment))
+data2.lm <- lm(ocular.units~sugar.treatment)
+summary(data2.lm)
+data2.aov <- aov(ocular.units~sugar.treatment)
+TukeyHSD(data2.aov)
+summary(lm(data2.aov))
+bartlett.test(ocular.units~sugar.treatment)
+shapiro.test(data2.aov$residuals)
+plot(data2.aov)
+detach(data2)
+```
+
+## Conclusion
+
+Based on the results from ANOVA, we see that F(4,45) = 49.37; p < 0.000, showing significant effects from the use of 2% sucrose compared to the other treatments. The Scale-Location graph shows residuals increase with the fitted  values; therefore, we reject the null hypothesis.
+
+As for why there are **fewer** ocular units **all** sugar treatments, I have no idea, it's not my data. Obviously, there is some other factor affecting the number of ocular units, but 2% sucrose does lead to more ocular units than the other treatments.
+
+Looking at Tukey's HSD, we can ignore "2%.fructose-1%gluc.1%fruct", "2%.glucose-1%gluc.1%fruct", and "2%.glucose-2%.fructose" as they are not statistically significant. As for the rest, glucose vs. sucrose have very similar means, the rest range from ~5-6, with those compared to the control having a 10.8 - 12.1 difference of means. The closest to the control would be the 2% sucrose, as noted earlier.
+
+***
+
+# Question III
+
+The Australian brown tree snake was introduced in Guam and has cause the extinction of two native birds. This snake seems to reproduce more often and less seasonally than in its native range in Australia.  
+
+The data provided represents the grams of fat in the sexual segment of the kidney, which is a good indication of sperm production in males.  
+
+All of the data was collected in the non-breeding.  
+
+Determine if there are any differences among the populations. 
+
+## Justification
+
+$H_0$: Location has no effect on the fat levels  
+$H_a$: Location does have an effect on the fat levels
+
+Looking at the boxplot, it would appear that the ArmP location has the highest fat content, and thus, wowuld indicate higher levels of sperm production; at the same time, TerriaUp snakes have a similar range, but a lower mean. Meanwhile, those snakes from the Lilos group have a relatively small range of fat content that is far lower than the previous two locations.
+
+## Results
+
+```{r}
+data3 <- read.delim("h3p3.txt")
+attach(data3)
+summary(data3)
+plot(Fat.g~Population)
+anova(lm(Fat.g~Population))
+data3.aov <- aov(Fat.g~Population)
+TukeyHSD(data3.aov)
+summary(lm(data3.aov))
+bartlett.test(Fat.g~Population)
+shapiro.test(data3.aov$residuals)
+plot(data3.aov)
+detach(data3)
+```
+
+## Conclusion
+
+Looking at the Normal Q-Q plot, those residuals falling into the 1st and 2nd quantile are higher than expected. The scale-location plot shows the residuals increase with the fitted data.
+
+As for the ANOVA, we have an F(2,60) = 11.10; p < 0.00, meaning we can reject the null hypothesis and can state that location does play a role in fat content and a likely effect on sexual reproduction.
+
+I am unable to say for sure what each of the locations represents (none of the three specify any country (Guam, Australia, etc.); I could look them up, but again, it's not my data and was not supplied...I'm just a number cruncher).
+
+***
+
+# Question IV
+
+Wood density, and to a great extent hardness, is mostly determined by the number of pores/mm^2^ in the wood.  
+
+Determine which of the three species has the greatest hardness.  
+
+Which one the least?  
+
+## Justification
+
+$H_0$: pore density has no effect of the hardness of the wood   
+$H_a$: Pore density does have an effect of the hardness of the wood
+
+**Note: the data merely states SPP and Cells, not pores/mm^2^; I am going to assume -- based on Camilo's lecture this morning (where he discussed Teak being extremely hard) -- that we are looking for lower values of "cells."**  
+
+The boxplot of the raw data shows Oak having thy highest number of cells, with mahogany a distant second and teak coming in with approximately half the cells as mahogany.
+
+## Results
+```{r}
+data4 <- read.delim("h3p4.txt")
+attach(data4)
+summary(data4)
+plot(Cells~SPP)
+anova(lm(Cells~SPP))
+data4.aov <- aov(Cells~SPP)
+TukeyHSD(data4.aov)
+summary(lm(data4.aov))
+bartlett.test(Cells~SPP)
+shapiro.test(data4.aov$residuals)
+plot(data4.aov)
+
+detach(data4)
+```
+
+## Conclusion
+
+The Normal Q-Q plot shows a negative skew for the -1 and -2 quantiles and a positive skew for the +1 and +2 quantiles, denoting lower than and higher than expected results respectively. We have an F(2,72) = 80.91; p < 0.00, showing that we reject the null hypothesis that pore density does not affect hardness and accept the alternate hypothesis.
+
+Scale-location shows that the residuals increase with the fitted data.
+
+Based on these results, Teak is the hardest of the woods, followed by mahogany, and then oak being the softest of the three.
+
+***

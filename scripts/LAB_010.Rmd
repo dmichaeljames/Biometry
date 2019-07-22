@@ -1,0 +1,186 @@
+---
+title: "LAB_010"
+author: "Mike James"
+date: "4/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ISwR)
+```
+
+```{r}
+data("thuesen")
+head(thuesen)
+summary(thuesen)
+```
+
+$H_o: X, Y, Z$ are independent  
+$H_a:$ correlated
+
+### Pearson's product-moment ('r')
+* Range: {-1,1}
+* Normal distribution
+
+The closer the observed value is to zero is **less** likely to be correlated.  
+
+$H_o: r = 0$  
+$H_a: r \ne 0$
+
+* positive correlation (graphs mirror one-another)
+* negative correlation (graphs are opposite one another (i.e. when one increases, the other decreases)).
+
+```{r}
+(cor(thuesen))
+```
+
+In the above, there is no correlation.  
+
+```{r}
+(cor(thuesen, use = "complete.obs"))
+```
+
+Here, we've only used complete data (there was a missing value in short.velocity).  
+
+Now we need to check significance.
+
+```{r}
+(cor.test(thuesen$blood.glucose, thuesen$short.velocity))
+```
+
+This is a modified t-test.  
+
+>95 percent confidence interval:  
+> 0.005496682 0.707429479
+ 
+Since the interval does not include 0; therefore, the coefficient is different and the data is correlated. 
+ 
+Spearmen: $\rho$ semi-quantitative
+Kendall:  $\tau$ 
+
+```{r}
+  (cor.test(thuesen$blood.glucose, thuesen$short.velocity, method = "spearman"))
+```
+
+```{r}
+(cor.test(thuesen$blood.glucose, thuesen$short.velocity, use="complete.obs", method = "kendall"))
+```
+
+***
+
+# NEW DATA
+
+***
+```{r}
+data(iris)
+head(iris)
+cor(iris[,1:4])
+```
+
+```{r}
+pairs(iris)
+```
+
+```{r}
+plot(thuesen$blood.glucose, thuesen$short.velocity)
+mean(thuesen$short.velocity, na.rm = TRUE)
+abline(mean(thuesen$short.velocity, na.rm = TRUE), 0)
+thuesen.lm <- lm(thuesen$short.velocity ~ thuesen$blood.glucose)
+abline(thuesen.lm)
+summary(thuesen.lm)
+```
+
+```{r}
+dissolved <- read.table("nitrogen.csv", sep=",")
+head(dissolved)
+plot(dissolved$pressure, dissolved$dissolved.NO)
+abline(mean(dissolved$dissolved.NO), 0)
+NO.lm <- lm(dissolved$dissolved.NO ~ poly(dissolved$pressure.tms, 2))
+plot(NO.lm)
+abline(NO.lm)
+```
+
+### Fitted Value
+
+```{r}
+fitted(NO.lm)
+```
+
+### Residuals
+
+```{r}
+residuals(NO.lm)
+```
+
+### Predictions
+
+```{r}
+predict(NO.lm, int ="c") # Confidence intervals
+predict(NO.lm, int="p") # Prediction intervals
+```
+
+Now, in order to predict an X-value based on your Y-values:
+
+```{r}
+x <- data.frame(blood.glucose="6")
+predict(thuesen.lm, newdata=x, interval="prediction")
+```
+
+***
+
+### Plotting a regression plot
+
+Absolute minimum is the data and the regression line (and should also include the prediction interval).  
+
+Can also include CI, but not as common.  
+
+**INCLUDE ALL OF THESE FOR THE HOMEWORK**
+
+```{r}
+options(na.action=na.exclude)
+thuesen.lm <- lm(short.velocity ~ blood.glucose, data=thuesen)
+pred.frame <- data.frame(blood.glucose=4:20)
+pp <- predict(thuesen.lm, int="p", newdata=pred.frame)
+pc <- predict(thuesen.lm, int="c", newdata=pred.frame)
+```
+
+```{r}
+attach(thuesen)
+plot(blood.glucose, short.velocity, ylim=range(short.velocity, pp, na.rm = TRUE))
+pred.gluc <- pred.frame$blood.glucose
+matlines(pred.gluc, pc, lty = c(1,2,2), col="blue")
+matlines(pred.gluc, pp, lty = c(1,3,3), col="red")
+detach(thuesen)
+```
+
+Center point is where confidence is highest ($\bar_y, \bar_x$).  
+
+### Diagnostics
+
+```{r}
+opar <- par(mfrow=c(2,2), mex=0.6, mar=c(4,4,3,2)+0.3)
+plot(thuesen.lm, which=1:4)
+par(opar)
+```
+
+Cook's Distance shows point 13 is closing in on an outlier (1.0 = outlier, 13 is ~0.7).
+
+Residuals vs fitted: If data is normal$\pm$ 1 sd = ~66%, $\pm$ 2 sd = ~95%  
+
+transpose X/Y so projection becomes the mean with error bars (and all points show within the error bars)
+
+So, the RED line shows a lot of weight below the median. Not bad, but not great.
+
+Same for Scale-Location.
+
+Red line *should* be flat.
+
+***
+
+# HOMEWORK (fish respiration?)
+
+No worries about fixed or random (it's fixed)
+
+MAKE SURE CIs for **ALL** of the graphs.
+

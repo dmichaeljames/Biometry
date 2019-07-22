@@ -1,0 +1,117 @@
+---
+title: "LAB_004"
+author: "Mike James"
+date: "February 11, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+# Summary Stats for One Group
+
+
+```{r}
+library(tidyverse)
+library(ISwR)
+```
+
+```{r}
+x <- rnorm(50)
+(mean(x))
+(sd(x))
+(var(x))
+(median(x))
+(quantile(x))
+(pvec <- seq(0,1,0.1))
+(quantile(x, pvec))
+```
+
+***
+
+Not sure this is correct (he mentioned a few things and I missed what he said)
+
+```{r}
+x <- rnorm(15)
+(mean(x))
+(sd(x))
+(var(x))
+(median(x))
+(quantile(x))
+(pvec <- seq(0,1,0.1))
+(quantile(x, pvec))
+```
+
+***
+
+```{r}
+customFunction <- function(x) {
+  u <- mean(x)
+  m<-median(x)
+  q<-quantile(x)
+  s<-sd(x)
+  n<-length(x)
+  v<-var(x)
+  y<-x-u
+  y3<-y^3
+  y3.sum<-sum(y3)
+  g1<-n*y3.sum/((n-1)*(n*2)*s^3)
+  y4<-y^4
+  y4.sum<-sum(y4)
+  g2 <- ((n+1)*n*y4.sum/((n-1)*(n-2)*(n-3)*s^4))-((3*(n-1)^2)/((n-2)*(n-3)))
+  list(mean=u, median=m,quantiles=q,s=s,n=n,v=v,g1=g1,g2=g2)
+}
+```
+
+```{r}
+attach(juul)
+mean(igf1)
+mean(igf1, na.rm=T) # literally removes all line with N/A in it
+sum(!is.na(igf1))
+summary(igf1)
+summary(juul)
+```
+
+***
+
+Changing variable conding
+
+***
+
+```{r}
+detach(juul)
+juul$sex <- factor(juul$sex, labels = c("M","F"))
+juul$menarche <- factor(juul$menarche, labels = c("No","Yes"))
+juul$tanner <- factor(juul$tanner, labels = c("I","II","III","IV","V"))
+attach(juul)
+summary(juul)
+```
+```{r}
+detach(juul)
+```
+
+***
+
+# Moving on to T-Test
+
+```{r}
+# silkworms
+t.test(nephron.length~sex, data=unequal.vats)
+```
+
+```{r}
+# silkworms
+t.test(nephron.length~sex, var.equal=F, data=unequal.vats)
+```
+
+```{r}
+var.test(nephron.length~sex, data = unequal.vats)
+```
+
+```{r}
+# silkworms
+t.test(nephron.length~sex, paired=TRUE, var.equal=F, data=unequal.vats)
+```

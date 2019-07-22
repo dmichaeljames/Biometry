@@ -1,0 +1,38 @@
+---
+title: "HOMEWORK_ADD"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Rmisc)
+library(ggplot2)
+library(csv)
+```
+
+### GRAPH
+
+```{r}
+data <- read.csv("ggplot.example.data.csv")
+data.SE3 <- summarySE(data, measure = "Log.Seed.set", groupvars = c("Treatment", "Stage"))
+head(data.SE3)
+```
+
+***
+
+```{r}
+ggplot(data.SE3, aes(x = Treatment, y = Log.Seed.set, group = Stage, color = Stage)) +
+  geom_errorbar(aes(ymin = Log.Seed.set - se, ymax = Log.Seed.set + se), color = "black", width = 0.1) +
+  geom_point() +
+  ylab("Log(Seed Set) ± se") + # if you need the xlab, do the same thing
+  scale_color_hue(name = "Stage") + # This gives a custom title to the legend
+  ggtitle("Seed Set as a Function of Treatment and Life Stage") +
+  theme(axis.title.x = element_text(size = rel(1.25)), 
+        axis.title.y = element_text(size = rel(1.25)), 
+        axis.text = element_text(size = rel(1.0)),
+        legend.text = element_text(size = rel(1)),
+        legend.title = element_text(size = rel(1)),
+        legend.justification = c(7,-3),
+        legend.position = c(1,0),
+        plot.title = element_text(hjust = 0.5))
+```

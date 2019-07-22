@@ -1,0 +1,104 @@
+---
+title: "LAB_002"
+author: "Michael James"
+date: "January 28, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set the working directory to the Dropbox folder
+
+```{r}
+setwd("~/Dropbox/SLU/BIOMETRY/LAB/Data")
+```
+
+Let's go ahead and load a library.
+
+```{r}
+library(ISwR)
+```
+
+Import our "crabs.csv" into a data.frame called "crabs" and display the summary info
+
+```{r}
+crabs <- read.csv("crabs.csv")
+summary(crabs)
+```
+Now, Camilo added "crabs" with attach(), so I will too
+
+```{r}
+attach(crabs)
+```
+
+A quick histogram, then an adjusted histogram (to make the empty bin "lump" with the previous) with axis labels and a proper title
+```{r}
+hist(BODYWT)
+hist(BODYWT, breaks=5, xlab = "Crab Body Weight (mg)", ylab = "Number of observed crabs", main = "Observed Crab Body Weight Distribution", col = "red", border = "white")
+```
+
+Next up, we're going to look at a scatterplot
+
+```{r}
+plot(GILLWT,BODYWT, xlab = "Crab Gill Weight (mg)", ylab = "Crab Weight (mg)", col = "orange", main = "Gill weight VS. Body Weight")
+```
+
+Box plot time. By the way:  
+
+> '~' means "AS A FUNCTION OF  
+
+```{r}
+boxplot(GILLWT ~ SEX, xlab = "sex", ylab = "Gill Weight (mg)", main = "Sex VS. Gill Weight (mg)")
+boxplot(BODYWT ~ SEX, xlab = "sex", ylab = "Body Weight (mg)", main = "Sex VS. Body Weight (mg)", ylim = c(5,30), col = "red")
+```
+
+**The dots in the Body Weight VS. Sex are outliers.**
+
+***
+
+# Indexing  
+
+Figure out what type of data we have in crabs, then show specific rows and columns
+
+```{r}
+(class(crabs))
+(gillWt <- crabs[7:11,2])
+(bodyWt <- crabs[7:11,1])
+(ALL <- crabs[7:11,1:2])
+```
+
+Removing what I just made so I can do the next part
+
+```{r}
+rm(gillWt)
+rm(bodyWt)
+rm(ALL)
+(crabs$SEX)
+(maleCrabs <- crabs[crabs$SEX == "M", ])
+```
+
+Plot Gill Weight VS. Body Weight of males
+
+```{r}
+attach(maleCrabs)
+plot(GILLWT,BODYWT, xlab = "Crab Gill Weight (mg)", ylab = "Crab Weight (mg)", col = "blue", main = "Gill Weight VS. Body Weight of MALES ONLY")
+detach(maleCrabs)
+```
+
+Transform Gill Weight with a log function
+
+```{r}
+plot(log10(BODYWT), GILLWT, xlab = "Crab Body Weight (mg)", ylab = "Crab Gill (mg)", col = "blue", main = "Sexual Dimorphism")
+detach(crabs)
+```
+
+Sample T-test
+
+```{r}
+attach(crabs)
+t.test(log10(GILLWT) ~ SEX)
+t.test(log10(BODYWT) ~ SEX)
+detach(crabs)
+```

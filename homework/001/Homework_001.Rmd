@@ -1,0 +1,72 @@
+---
+title: "Biometry - Homework_001"
+author: "Michael James"
+date: "February 12, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+***
+
+## Question 1
+
+#### barplot
+
+Here we grab the dataset from limpets.csv, calculate the means, standard deviations, lengths, and standard errors.
+
+```{r}
+# Straight "borrowed" from the book
+limpetData <- read.csv("limpets.csv", header=TRUE, sep=",")
+(means <- with(limpetData, tapply(O2, list(SPECIES,SEAWATER), mean)))
+(sds <- with(limpetData, tapply(O2, list(SPECIES,SEAWATER), sd)))
+(lengths <- with(limpetData, tapply(O2, list(SPECIES,SEAWATER), length)))
+(sems <- sds/sqrt(lengths))
+```
+
+Now, taking all of the calculations, we create a barplot.
+
+```{r}
+bp <- barplot(means, ylim = c(min(pretty(means-sems)), max(pretty(means+sems))), beside = T, xpd = F, ylab = "Oxygen consumption", legend.text = rownames(means))
+arrows(bp, means+sems, bp, means-sems, angle=90,  code = 3, length = 0.05)
+box(bty="l")
+```
+  
+  
+
+***
+
+## Question 2
+
+#### BEES!
+
+Here, I've *shamelessly* reused the structure for my calculations and creation of the graph from question 1 with the required modifications to make it work with this dataset. 
+
+```{r}
+bees <- read.csv("wing.light.tran.csv", header=TRUE, sep=",")
+(means <- with(bees, tapply(wing.translucent, list(Population), mean)))
+(sds <- with(bees, tapply(wing.translucent, list(Population), sd)))
+(lengths <- with(bees, tapply(wing.translucent, list(Population), length)))
+(sems <- sds/sqrt(lengths))
+bp <- barplot(means, ylim = c(min(pretty(means-sems)), max(pretty(means+sems))), beside = T, xpd = F, ylab = "Translucency of wings")
+arrows(bp, means+sems, bp, means-sems, angle=90,  code = 3, length = 0.05)
+box(bty="l")
+```
+
+Now, assuming I have actually done this correctly, at first glance, it does seem there is *some* amount of diffrerence, and that -- in fact -- bees on the north side do have more translucent wings; however, look at those error bars -- that's a lot of overlap. I would be remiss to claim there is a significant difference betwixt the northern and southern regions as far as wing translucency is concerned.
+  
+  
+
+***
+
+## Question 3  
+
+#### Willig and Camilo: The Case of the Iffy T-Test  
+
+In 1991, Willig and Camilo authored a paper where they utilized a **paired t-test** to "document direct and indirect effects of a natural disturbance of high
+intensity, large scale, but low frequency on selected aspects of animal ecology." The question is, were they justified in using said t-test and was there, perhaps, a more appropriate test they should have used?  
+
+Seeing as Willig and Camilo already had the data for the 40 sites previous to the hurricane, it makes sense to go back to those 40 sites, gather the data and run a paired t-test; however, it *may* have been better to run an **unpaired two-sample t-test**. 

@@ -1,0 +1,168 @@
+---
+title: "LAB_005"
+author: "Mike James"
+date: "2/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- save(limpets, file="limpets.RData") -->
+<!-- setwd(~/myproject/data/) -->
+<!-- load(file=~/myproject/data/"whatever.RData") -->
+
+# One- and Two-Sample Tests
+
+### One-Sample t-test
+
+H~0~: Null Hypothesis
+H~a~: Sample mean is different form the theorhetical mean  
+
+> Parametric: 
+
+```{r}
+daily.intake <- c(5260,5470,5640,6180,6390,6515,6805,7515,7515,8230,8770)
+mean(daily.intake)
+sd(daily.intake)
+quantile(daily.intake)
+t.test(daily.intake, mu=7725)
+```
+
+$6754 \pm1142$
+
+Is **our** mean indistinguishable from that of Lipitor®? 
+
+$$t = \frac{\bar{x} - \mu_{0}{SEM}}$$
+
+$$P(Tt\le t) = \int_{-\inf}^{t}f(t)$$
+
+Two-sided is the $\pm$SD at the upper and lower boundaries.
+
+```{r}
+daily.intake <- c(5260,5470,5640,6180,6390,6515,6805,7515,7515,8230,8770)
+mean(daily.intake)
+sd(daily.intake)
+quantile(daily.intake)
+t.test(daily.intake, mu=7725, alternative="greater")
+```
+
+Here, the t-test is wildly different because we set up the "alternative hypothesis."
+
+***
+
+# Wilcoxon Signed-Rank Test  
+
+If your data is small, do *not* worry about transforming it.  
+
+```{r}
+daily.intake <- c(5260,5470,5640,6180,6390,6515,6805,7515,7515,8230,8770)
+mean(daily.intake)
+sd(daily.intake)
+quantile(daily.intake)
+wilcox.test(daily.intake, mu=7725)
+wilcox.test(daily.intake, mu=7725, alternative="greater")
+```
+
+This isn't as powerful as the parametric tests
+
+### Two-Sample t-test
+
+$$t = \frac{\bar{x_{2}} - \bar{x_{1}}{SEDM}$$
+
+$$SEDM = \sqrt{SEM_{1}^{2} - SEM_{2}^{2}}$$
+
+```{r}
+library(ISwR)
+(attach(energy))
+t.test(expend~stature)
+t.test(expend~stature, var.equal=T)
+```
+
+And, of course, we do this with the non-parametric Wilcoxon Test
+
+```{r}
+wilcox.test(expend~stature)
+```
+
+### Paired t-test
+
+```{r}
+(attach(intake))
+t.test(pre, post, paired=T)
+wilcox.test(pre, post, paired=T)
+```
+
+### Testing Assumptions
+
+Is the data **normally** distributed?
+
+H~0~: Yes they are
+H~a~: No, they are not
+
+```{r}
+shapiro.test(daily.intake)
+tapply(expend, stature, shapiro.test)
+```
+
+Are the variances even?
+
+```{r}
+var.test(expend~stature)
+```
+
+$Pop \rightarrow Sample$
+$\bar{x} \leadsto \mu$
+$s \leadsto \sigma$  
+
+***
+
+```{r}
+library(readr)
+(LeafData <- read_delim("~/Dropbox/SLU/BIOMETRY/LAB/Data/LeafData.tsv","\t", escape_double = FALSE, trim_ws = TRUE))
+summary(LeafData)
+
+# Make sure to attach the data so you can reference the headers
+attach(LeafData)
+t.test(HEIGHT~PARK)
+
+# Determine if the data is normal
+var.test(log10(HEIGHT)~PARK)
+tapply(log10(HEIGHT), PARK, shapiro.test)
+
+# Boxplot
+boxplot(HEIGHT~PARK)
+boxplot(log10(HEIGHT)~PARK)
+
+# Wilcoxon
+wilcox.test(HEIGHT~PARK)
+```
+
+The differences are in variances, not the means.  
+
+In Hawn, more short plants than tall. Similar to the "Bill Gates statistically makes us millionaires when he walks in the room."  
+
+***
+
+# Next weeks homework
+
+1. LEAF.NUMBER~PARK
+2. LEAF.W~LIFE.STAGE
+
+## Three Sections
+### ONE: Justification
+* Which test?
+* Why?
+    * Normality
+    * Homogeneity of VARs
+    * Graph (boxplot())  
+    
+### TWO: Actual Test and Results
+* t-tests
+* graphs (could be the same, could be the log10 transformed version)
+
+### THREE: Conclusion
+* Accept/Reject because of...???
+
+

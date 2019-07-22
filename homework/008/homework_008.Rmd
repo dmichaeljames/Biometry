@@ -1,0 +1,218 @@
+---
+title: "Homework 8"
+author: "Mike James"
+date: "4/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(car)
+H9P1 <- read.csv("./H9P1.csv", sep = ",", header = TRUE)
+H9P2 <- read.csv("./H9P2.csv", sep = ",", header = TRUE)
+```
+
+## Problem I
+
+> A plant physiologist is interested in how wild chile plants respond to
+environmental variability, specifically atmospheric RELATIVE HUMIDITY.  
+
+> Our plant physiologist measured the WATER POTENTIAL at the tip of three leaves for each of 38 plants along a relative
+humidity gradient in Arizona.  
+
+> He hypothesized that there is a CUBIC RELATIONSHIP between the
+RELATIVE HUMIDITY in the air and the WATER POTENTIAL in chile plants.  
+
+> He averaged the three leaves to minimize measurement error, thus only one reading per plant, and transformed all
+the data to meet the assumptions of the test.
+
+***
+
+### Justification
+
+Since the relative humidity is along a controlled gradient, this is a Model I ANOVA utilizing fixed factors.
+
+$H_0:$ No variance between the relative humidty and the water potential in the leaves.  
+
+***
+
+### Results
+
+```{r, echo=FALSE}
+# head(H9P1)
+summary(H9P1)
+t.test(H9P1$asin.relative.humidity, H9P1$H2o.potential)
+```  
+***  
+    
+We can immediately see that the means are not equal.
+
+***
+
+```{r, echo=FALSE}
+scatterplot(H2O.potential ~ asin.relative.humidity, data=H9P1, xlab = "Relative Humidity", ylab = "Water Potential at the Leaf Tips")
+```
+
+***
+
+Our scatter plot shows the data looks to be cubic in nature.
+
+***
+
+```{r, echo=FALSE}
+plot(lm(H2O.potential ~ asin.relative.humidity, data=H9P1), which = 1)
+```
+
+***
+
+We *might* have a couple of outliers, but they do not appear to affect the outcome.
+
+***
+
+```{r, echo=FALSE}
+H9P1.lm1 <- lm(H2O.potential~asin.relative.humidity, H9P1)
+H9P1.lm2 <- lm(H2O.potential~asin.relative.humidity + I(asin.relative.humidity^2), H9P1)
+H9P1.lm3 <- lm(H2O.potential~asin.relative.humidity + I(asin.relative.humidity^2) + I(asin.relative.humidity^3), H9P1)
+H9P1.lm4 <- lm(H2O.potential~asin.relative.humidity + I(asin.relative.humidity^2) + I(asin.relative.humidity^3) + I(asin.relative.humidity^4), H9P1)
+
+anova(H9P1.lm1, H9P1.lm2)
+anova(H9P1.lm2, H9P1.lm3)
+```
+
+***
+
+Up through this point, all data points to valid variance.
+
+***
+
+```{r, echo=FALSE}
+anova(H9P1.lm3, H9P1.lm4)
+```
+
+***
+
+Here we can see that fitting the data to the 4th degree is not statistically significant (p = 0.4164).
+
+***
+
+```{r, echo=FALSE}
+plot(H9P1.lm3, which=1)
+```
+
+***
+
+While there may be a possible outlier in the upper ranges of the relative humidity, they do not change the outcome much, if at all.
+
+***
+
+```{r, echo=FALSE}
+attach(H9P1)
+
+plot(H2O.potential~asin.relative.humidity, data = H9P1, pch=16, xlab="Relative Humidity", ylab="Water Potential", main="Relative Humidity Vs. Water Potential in Leaves")
+x <- seq(0,10,l=1000)
+points(x, predict(H9P1.lm3, data.frame(asin.relative.humidity=x)), type="l", col="red")
+
+detach(H9P1)
+```
+
+
+### Conclusion
+
+According to ANOVA, the data is -- in fact -- cubic (F = 69.748, p <<< 0.05) thus allowing us to reject the null hypothesis.  
+
+As the relative humidity increases, the water potential in the leaves increases until the relative humidity reaches a value of ~5.54, at which point the water potential begins to drop off.
+
+***
+***
+***
+
+## Problem II
+
+> Our botanist, still interested in chiles' biology, collected seeds from the highest elevation
+populations and brought them back to the lab. The seeds were weighed, planted, and
+followed for two weeks to determine which ones GERMINATED (1), and which ones DID NOT GERMINATE (0).  
+
+> Our intrepid botanist wanted to predict, based on SEED MASS, which seeds will emerge in two
+weeks and which ones wouldn’t.
+
+### Justification
+
+All samples were taken from the highest elevation; thus, this is a fixed factor Model I ANOVA.
+
+$H_0:$ No correlation between the seed mass and whether the seeds germinate. This is a fixed effect in that the seeds either germinated or they did not.
+
+***
+
+### Results
+
+```{r, echo=FALSE}
+#head(H9P2)
+summary(H9P2)
+t.test(H9P2$seed.mass, H9P2$germination)
+```
+
+```{r, echo=FALSE}
+boxplot(seed.mass ~ as.factor(germination), data=H9P2, xlab = "Germination", ylab="Seed Mass (mg)", main = "Germination Based on Seed Mass")
+```
+
+***
+
+The boxplot shows a marked cutoff at 40mg, at which point seeds with a mass **below** 40mg were not likely to germinate, while those with a mass > 40mg were able to germinate.
+
+***
+
+```{r, echo=FALSE}
+H9P2.lm <- lm(seed.mass ~ as.factor(germination), data=H9P2)
+plot(H9P2.lm, which = 1)
+```
+***
+
+Here out residuals are nicely separated nicely.
+
+***
+
+
+```{r, echo=FALSE}
+H9P2.glm <- glm(H9P2$germination~H9P2$seed.mass, family=binomial, data=H9P2)
+summary(H9P2.glm)
+```
+
+***
+
+Here we can see the z-values the coefficients are statistically valid (intercept: p = 0.0188, seed.mass: p = 0.0106)
+
+***
+
+
+```{r, echo=FALSE}
+anova(H9P2.lm, test="Chisq")
+```
+
+***
+
+Our $\chi^2$ test shows variance in the seed mass with respect to germination (F = 12.324, p = 0.001534).
+
+***
+
+```{r, echo=FALSE}
+H9P2.glm <- glm(germination~seed.mass, family=binomial, data=H9P2)
+
+xs <- seq(0,100,l=30)
+H9P2.predict <- predict(H9P2.glm, type="response", se=T, newdata=data.frame(seed.mass=xs))
+
+plot(germination~seed.mass, data=H9P2, xlab="", ylab="", pch=16, axes=F, main = "Does Seed Mass Affect Germination?")
+points(H9P2.predict$fit~xs, type="l", col="red")
+lines(H9P2.predict$fit+H9P2.predict$se.fit ~ xs, col="gray", type="l", lty=2)
+lines(H9P2.predict$fit-H9P2.predict$se.fit ~ xs, col="gray", type="l", lty=2)
+
+mtext(expression("Germinated"), 2, line=3)
+axis(2,at=seq(0,1), c("No","Yes"))
+mtext("Seed Mass",1, line=3)
+axis(1)
+box(bty="l")
+
+```
+
+### Conclusion
+
+We are able to reject the null hypothesis as there is obvious variance between seed mass and whether the seeds germinate.

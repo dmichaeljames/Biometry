@@ -1,0 +1,131 @@
+---
+title: "HOMEWORK_004"
+author: "Mike James"
+date: "March 16, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(lme4)
+library(gplots)
+library(ggplot2)
+```
+
+### Problem 1
+
+#### Justification
+
+> A marine biologist is researching the seasonal effect on reproductive strategies of limpets as a function of intraspecific competition. He set cages for the limpets in intertidal pools in California. Each of the cages had a different density of limpets (8, 15, 30 and 45), He measured the the mass of the egg clusters and log-transformed them to meet the assumptions of the test. Are there any detectable effects?
+
+Looking at the normalized boxplots (see **results** section below), the egg density appears to be higher in the spring than in the summer season.
+
+#### Results
+
+```{r}
+limpet <- read.csv('h5p1.csv')
+summary(limpet)
+boxplot(limpet$EGGS~limpet$SEASON, xlab = "Season", ylab = "Egg Density")
+```
+
+As referenced above, the boxplot shows the egg density in the spring as being higher than in the summer.
+
+
+```{r}
+plotmeans(limpet$EGGS~limpet$SEASON)
+```
+
+Even though the line connecting the two means is useless, this too shows a higher egg density in the spring vs. the summer
+
+```{r}
+(limpetaov <- aov(limpet$EGGS~limpet$SEASON))
+plot(limpetaov)
+```
+
+Here we see the residuals vs fitted having equal variance.
+
+According to the qq plot, resuduals drop off in the upper quantiles and are slightly higher in the lower quantiles.
+
+Looking at the scale-location plot, we can see a *slight* increase in residuals with respect to the fitted values.
+
+And the constant leverage shows all factors are well fit.
+
+```{r}
+bartlett.test(limpet$EGGS~limpet$SEASON)
+```
+
+For the Bartlett test, we see that the p-value is 0.3117, which does not allow us to reject the null hypothesis; meaning the variance is the same for all groups.
+
+```{r}
+t.test(limpet$EGGS~limpet$SEASON)
+```
+
+Here, the Welch t-test p-value allows us to reject the null hypothesis that the means are equal between the two seasons.
+
+
+#### Conclusion
+
+According to all results, the seasons **do** affect the egg density of limpets.
+
+
+***
+
+### Problem 2
+
+#### Justification
+
+> A botany student is interested in how productivity in tomato plants responds to soil microbial amendments. He uses three levels of a commercial variety that claims to improve productivity. He then proceeds to place fifteen plants in each of five greenhouses across campus and he labels those according to orientation. Determine if there are significant effects due to the soil treatment.
+
+The boxplot below shows the low and medium amendments having roughly the same mean while the high amendment treatment shows a higher mean.
+
+#### Results
+
+```{r}
+tomatoes <- read.csv('h5.p2.csv')
+summary(tomatoes)
+```
+
+```{r}
+boxplot(tomatoes$productivity~tomatoes$Soil.mix)
+```
+
+As mentioned above, this boxplot shows the **high** amendment having a greater productivity than both the low and medium amendments.
+
+```{r}
+(tomaov <- aov(tomatoes$productivity~tomatoes$Soil.mix))
+plot(tomaov)
+```
+
+Our residuals vs. the fitted data show a similar scatter for all, meaning variance is equal.
+
+The qq-plot shows a slight elevation of residuals at the lower quantiles and a decrease at the upper quantiles.
+
+There is a slight increase in residuals with the fitted values according to the scale-location plot.
+
+And the constant leverage plot shows equally fitted values for the factors.
+
+```{r}
+anova(aov(tomatoes$productivity~tomatoes$Soil.mix))
+```
+
+Here we see that we can reject the null hypothesis that the variances are the same among the different amendments.
+
+```{r}
+bartlett.test(tomatoes$productivity~tomatoes$Soil.mix)
+```
+
+According to the Bartlett test, we have a p-value of 0.6591; meaning, we cannot reject the null hypothesis that the variances are the same.
+
+```{r}
+TukeyHSD(aov(tomatoes$productivity~tomatoes$Soil.mix))
+```
+
+According to Tukey HSD, there is a significant difference in means between the low-high and med-high amendments. Tukey HSD also shows there is no significant difference in means betwixt the medium and low amendments.
+
+#### Conclusion
+
+According to the results, there is a significant difference between the high amendment treatment and the low/medium amendments. There is **not**, however, a significant difference between the low and medium amendments.
+
+That being said, I am confused about the bartlett test, as according to the results, we cannot reject the null hypothesis; however, the ANOVA analysis of the AOV says we **can** reject the null hypothesis and that there **is** a difference in variance.
+

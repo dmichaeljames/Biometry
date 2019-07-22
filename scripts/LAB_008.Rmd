@@ -1,0 +1,68 @@
+---
+title: "LAB_010_ggplot"
+author: "Mike James"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(Rmisc)
+```
+
+***
+
+### ggPlot2
+
+Here's the data given to us for the lab (ggplot.example.data.csv):
+
+```{r}
+# ggplot.example.data <- read.csv()
+head(ggplot.example.data)
+```
+
+The plants are inoculated with something and then specific treatments are used.  
+
+The population can be split into known quantities; thus, they are a fixed effect.  
+
+Genet v. Ramit: Genet is a plant that comes from the roots of a plant / Ramit is an individual plant.  
+
+***
+
+#### Example
+
+We have an orchard with four farms. We have fruit flies. 
+
+We treat two of sections of trees in the orchard...
+
+```{r}
+(data.SE <- summarySE(ggplot.example.data, measure = "Log.Seed.set", groupvars = c("Population", "Infection.state")))
+```
+
+Now, to plot it with ggplot2:
+
+```{r}
+ggplot(data.SE, aes(x = Population, y = Log.Seed.set, group = Infection.state, color = Infection.state)) +
+         geom_errorbar(aes(ymin = Log.Seed.set - se, ymax = Log.Seed.set + se), color = "black", width = 0.1) +
+         geom_point() +
+         geom_line() + # IF there is a correlation
+         ylab("Log(Seed Set) ± se") + # if you need the xlab, do the same thing
+         scale_color_hue(name = "Infection State") + # This gives a custom title to the legend
+         theme(axis.title.x = element_text(size = rel(1)), 
+               axis.title.y = element_text(size = rel(1)), 
+               axis.text = element_text(size = rel(1.0)),
+               legend.text = element_text(size = rel(1)),
+               legend.title = element_text(size = rel(1)),
+               legend.justification = c(5.7,-3.5),
+               legend.position = c(1,0))
+```
+
+### Something about homework
+
+Generate the appropriate graph using stage **and** treatment with all of the elements.
+
+***
+
+# THIS IS DUE WEDNESDAY!!!!!!!
+

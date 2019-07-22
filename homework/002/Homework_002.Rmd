@@ -1,0 +1,83 @@
+---
+title: "Homework_002"
+author: "Michael James"
+date: "February 24, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+***
+
+```{r}
+library(readr)
+(LeafData <- read_delim("LeafData.tsv","\t", escape_double = FALSE, trim_ws = TRUE))
+summary(LeafData)
+
+# Make sure to attach the data so you can reference the headers
+attach(LeafData)
+```
+***
+
+# Question 1:
+## Leaf Number with Respect to the Park
+
+### Justification
+
+A little *a priori* knowledge from this benevolent overlord guy that Hawn SP had a fire, thus clearing the way for smaller plants to flourish, leads me to assume that -- in general -- more trees in St. Francis are going to be larger and have more leaves that the mostly younger trees of Hawn.
+
+Seeing as the two datasets will likely have vastly different variances, I'm going to go with the Welch Two Sample t-test.
+
+### Results
+  
+```{r}
+t.test(`LEAF NUMBER`~PARK)
+
+# Boxplot
+boxplot(`LEAF NUMBER`~PARK, xlab="State Park", ylab = "Number of Leaves", main = "Number of Leaves as it pertains to the State Park")
+boxplot(log10(`LEAF NUMBER`)~PARK, xlab="State Park", ylab = "Number of Leaves", main = "Normalized Number of Leaves as it pertains to the State Park")
+
+# Looking at a normalized t-test
+t.test(log10(`LEAF NUMBER`)~PARK)
+
+```
+
+### Conclusion
+
+Looking at the t-test results, even those with normalized data, show that there is, in fact, a big difference between the two parks. That being said, the mean for Hawn is **higher** than St. Francis, meaning *more* leaves per tree at Hawn than at St. Francis. The null hypothesis would say that they both have the same mean, which they do not, thus, I would reject the null hypothesis; however, as for **why** the trees in Hawn have -- on average -- more leaves per tree I'm not sure. Perhaps the smaller trees just have far more leaves than the mature trees of St. Francis (I don't know, I don't study trees)? Perhaps I've simply misunderstood the data (completely plausable)? 
+
+***
+
+# Question 2:
+## Leaf Width with Respect to the Life Stage
+
+### Justification
+
+For this dataset, I'm going with the Wilcoxon test. I chose this because I would venture to guess that leaf width based on the life stage of the trees shouldn'tt have anything to do with where it's located; it should be specific to the species of tree.
+
+### Results
+
+```{r}  
+# Wilcoxon
+wilcox.test(`LEAF W`~`LIFE STAGE`)
+
+# Boxplot
+boxplot(`LEAF W`~`LIFE STAGE`, xlab="Life Stage", ylab = "Leaf Width (cm)", main = "Leaf Width as it Pertains to the Life Stage of the Tree")
+boxplot(log10(`LEAF W`)~`LIFE STAGE`, xlab="Life Stage", ylab = "Leaf Width (cm)", main = "Normalized Leaf Width as it Pertains to the Life Stage of the Tree")
+```
+
+### Conclusion
+
+The calculated p-value is **very** small, leading me to argue for the rejection of the null hypothesis and state that leaf width is a function of the maturity of the tree.
+
+Looking at the two sets of box plots, the first plot, you have a wide range of leaf widths for the juveniles (some trees are bigger than others for their respective life stages) with an overall mean that is near 4, while the mature trees have, as *I* would expect, larger leaves.
+
+The second plot is the normalized data, which does not show anything significantly different, letting me know that using the Wilcoxon test was the right choice as it does not require normalization of the data.
+
+***
+
+
+
